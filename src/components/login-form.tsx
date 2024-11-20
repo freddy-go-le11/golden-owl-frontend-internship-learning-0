@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,9 +25,14 @@ import {
   FormMessage,
 } from "./ui/form";
 import { useTranslations } from "next-intl";
+import { CircleCheck } from "lucide-react";
 
 export function LoginForm() {
   const t = useTranslations("login");
+  const [, setFailedAttempts] = useState(0);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockTimeRemaining, setBlockTimeRemaining] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const formSchema = useMemo(
     () =>
@@ -38,7 +43,6 @@ export function LoginForm() {
     [t]
   );
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,15 +51,74 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = useCallback((data: z.infer<typeof formSchema>) => {
-    toast.success("Login Success", {
-      description: () => (
-        <pre className="p-2 bg-background w-full">
-          {JSON.stringify(data, null, 2)}
-        </pre>
-      ),
-    });
-  }, []);
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isBlocked) {
+      timer = setInterval(() => {
+        setBlockTimeRemaining((prev) => {
+          if (prev <= 1) {
+            setIsBlocked(false);
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isBlocked]);
+
+  const onSubmit = useCallback(
+    async (data: z.infer<typeof formSchema>) => {
+      if (isBlocked) return;
+
+      const promise = async () => {
+        try {
+          setIsProcessing(true);
+          // Simulating an API call
+          await new Promise<void>((resolve) => {
+            setTimeout(() => {
+              // Simulate a failed login attempt
+              // reject(new Error("Invalid credentials"));
+              resolve();
+            }, 1000);
+          });
+
+          setFailedAttempts(0);
+          return data;
+        } catch {
+          setFailedAttempts((prev) => {
+            const newAttempts = prev + 1;
+            if (newAttempts >= 5) {
+              setIsBlocked(true);
+              setBlockTimeRemaining(5);
+            }
+            return newAttempts;
+          });
+          throw new Error("Invalid credentials");
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+
+      toast.promise(promise(), {
+        loading: t("login-loading"),
+        success: (data) => (
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row gap-2 items-center">
+              <CircleCheck className="size-4" />
+              <h4 className="inline">{t("login-success")}</h4>
+            </div>
+            <pre className="p-2 bg-background ml-6 rounded-md text-foreground">
+              <code>{JSON.stringify(data, null, 2)}</code>
+            </pre>
+          </div>
+        ),
+        error: t("login-failed"),
+      });
+    },
+    [isBlocked, setFailedAttempts, t]
+  );
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -74,7 +137,11 @@ export function LoginForm() {
                   <FormItem className="grid gap-2">
                     <FormLabel>{t("email-label")}</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="m@example.com" />
+                      <Input
+                        {...field}
+                        placeholder="m@example.com"
+                        disabled={isBlocked || isProcessing}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -94,14 +161,24 @@ export function LoginForm() {
                       </Link>
                     </div>
                     <FormControl>
-                      <Input {...field} type="password" />
+                      <Input
+                        {...field}
+                        type="password"
+                        disabled={isBlocked || isProcessing}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                {t("submit")}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isBlocked || isProcessing}
+              >
+                {isBlocked
+                  ? `${t("blocked")} (${blockTimeRemaining}s)`
+                  : t("submit")}
               </Button>
               <Button type="button" variant="outline" className="w-full">
                 {t("google-login")}

@@ -10,6 +10,11 @@
     "submit": "Đăng nhập",
     "google-login": "Đăng nhập bằng Google",
     "register-label": "Chưa có tài khoản?",
-    "register-link": "Đăng ký"
+    "register-link": "Đăng ký",
+    "blocked": "Tài khoản của bạn đã bị khóa",
+    "block-message": "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau",
+    "login-loading": "Đang đăng nhập...",
+    "login-success": "Đăng nhập thành công",
+    "login-failed": "Đăng nhập thất bại"
   }
 }

@@ -10,6 +10,11 @@
     "submit": "Login",
     "google-login": "Login with Google",
     "register-label": "Don't have an account?",
-    "register-link": "Register"
+    "register-link": "Register",
+    "blocked": "Your account has been blocked",
+    "block-message": "You tried to login too many times. Please try again later",
+    "login-loading": "Logging in...",
+    "login-success": "Login successful",
+    "login-failed": "Login failed"
   }
 }
