@@ -24,15 +24,18 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { useTranslations } from "next-intl";
 
 export function LoginForm() {
+  const t = useTranslations("login");
+
   const formSchema = useMemo(
     () =>
       z.object({
-        email: z.string().email(),
-        password: z.string().min(8),
+        email: z.string().email(t("invalid-email")),
+        password: z.string().min(8, t("invalid-password")),
       }),
-    []
+    [t]
   );
 
   // 1. Define your form.
@@ -57,10 +60,8 @@ export function LoginForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
+        <CardTitle className="text-2xl">{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -71,7 +72,7 @@ export function LoginForm() {
                 name="email"
                 render={({ field }) => (
                   <FormItem className="grid gap-2">
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>{t("email-label")}</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="m@example.com" />
                     </FormControl>
@@ -84,12 +85,12 @@ export function LoginForm() {
                 render={({ field }) => (
                   <FormItem className="grid gap-2">
                     <div className="flex items-center">
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>{t("password-label")}</FormLabel>
                       <Link
                         href="#"
                         className="ml-auto inline-block text-sm underline"
                       >
-                        Forgot your password?
+                        {t("forgot-password")}
                       </Link>
                     </div>
                     <FormControl>
@@ -100,18 +101,18 @@ export function LoginForm() {
                 )}
               />
               <Button type="submit" className="w-full">
-                Login
+                {t("submit")}
               </Button>
               <Button type="button" variant="outline" className="w-full">
-                Login with Google
+                {t("google-login")}
               </Button>
             </div>
           </form>
         </Form>
         <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
+          {t("register-label")}{" "}
           <Link href="#" className="underline">
-            Sign up
+            {t("register-link")}
           </Link>
         </div>
       </CardContent>

@@ -1,0 +1,15 @@
+{
+  "login": {
+    "title": "Login",
+    "description": "Please enter your email and password to login",
+    "email-label": "Email",
+    "invalid-email": "Invalid email address",
+    "password-label": "Password",
+    "invalid-password": "Invalid password",
+    "forgot-password": "Forgot password?",
+    "submit": "Login",
+    "google-login": "Login with Google",
+    "register-label": "Don't have an account?",
+    "register-link": "Register"
+  }
+}
