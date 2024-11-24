@@ -58,6 +58,7 @@ export function LoginForm() {
         setBlockTimeRemaining((prev) => {
           if (prev <= 1) {
             setIsBlocked(false);
+            setFailedAttempts(0);
             clearInterval(timer);
             return 0;
           }
@@ -75,17 +76,17 @@ export function LoginForm() {
       const promise = async () => {
         try {
           setIsProcessing(true);
-          // Simulating an API call
-          await new Promise<void>((resolve) => {
-            setTimeout(() => {
-              // Simulate a failed login attempt
-              // reject(new Error("Invalid credentials"));
-              resolve();
-            }, 1000);
+
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
           });
 
+          const payload = await res.json();
+
           setFailedAttempts(0);
-          return data;
+          return payload;
         } catch {
           setFailedAttempts((prev) => {
             const newAttempts = prev + 1;
